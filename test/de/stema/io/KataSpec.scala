@@ -81,12 +81,12 @@ class KataSpec extends PlaySpec {
         case _ => auto
       }
 
-      val nullAuto = null
-      val audiMitNullMotor = Audi(null)
-      val bmwMitNullKerze = BMW(DieselMotor(100, null))
-      val bmwMitNullPs = BMW(BenzinMotor(null, Zündkerze(100)))
-      val audiMitNullPsUndNullKerze = Audi(DieselMotor(null, null))
-      val autoMitNullBrennwert = new Auto(new Motor(120, new Kerze(null)))
+      val nullAuto                     = null
+      val audiMitNullMotor             = Audi(null)
+      val bmwMitNullKerze              = BMW(DieselMotor(100, null))
+      val bmwMitNullPs                 = BMW(BenzinMotor(null, Zündkerze(100)))
+      val audiMitNullPsUndNullKerze    = Audi(DieselMotor(null, null))
+      val autoMitNullBrennwert         = new Auto(new Motor(120, new Kerze(null)))
       val bmwMitNullPsUndNullBrennwert = BMW(new Motor(null, new Kerze(null)))
 
       intercept[  NullAutoException]      (validate(  nullAuto))
