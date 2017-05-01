@@ -71,13 +71,13 @@ class KataSpec extends PlaySpec {
   "exceptions" should {
     "be thrown in any case" in {
       def validate(auto: Auto) = auto match {
-        case null                                   => throw NullAutoException("Auto ist null")
-        case Auto(null)                             => throw NullMotorException("Motor ist null")
-        case Auto(m@Motor(null, null))              => throw NullPsUndNullKerze("ps und kerze sind null")
-        case Auto(m@Motor(null, kerze@Kerze(null))) => throw NullPsUndNullBrennwert("ps sind null")
-        case Auto(m@Motor(null, _))                 => throw NullPsException("ps sind null")
-        case Auto(Motor(_, null))                   => throw NullKerzeException("Kerze is null")
-        case Auto(Motor(_, kerze@Kerze(null)))      => throw NullBrennwert("Brennstärke ist null")
+        case null                           => throw NullAutoException("Auto ist null")
+        case Auto(null)                     => throw NullMotorException("Motor ist null")
+        case Auto(Motor(null, null))        => throw NullPsUndNullKerze("ps und kerze sind null")
+        case Auto(Motor(null, Kerze(null))) => throw NullPsUndNullBrennwert("ps sind null")
+        case Auto(Motor(null, _))           => throw NullPsException("ps sind null")
+        case Auto(Motor(_, null))           => throw NullKerzeException("Kerze is null")
+        case Auto(Motor(_, Kerze(null)))    => throw NullBrennwert("Brennstärke ist null")
         case _ => auto
       }
 
