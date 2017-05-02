@@ -24,11 +24,7 @@ class CSVDataMapper {
       val inst = createInstance(typeOf[T])
       annotatedFields.foreach { field =>
         // for each annotated field in class of type T, get the name that is defined within annotation
-        /* FIXME fieldNames got by reflection contains leading and trailing quotes like
-        ""myName"". therefore we have either ensure, that the data (from csv) contains also quotes
-        within name, but that sucks, so create a sulution for that...
-        */
-        val fieldName = field._2.tree.children.tail.head.toString()
+        val fieldName = getFieldName(field)
         // get the value of the current data-set (one line of csv) by the annotation-name
         singleData.get(fieldName).foreach { fieldValue =>
           val instanceMirror = mirror.reflect(inst)
@@ -39,6 +35,11 @@ class CSVDataMapper {
       }
       inst.asInstanceOf[T]
     }
+  }
+
+  private def getFieldName(field: (TermSymbol, Annotation)) = {
+    val fieldName = field._2.tree.children.tail.head.toString()
+    fieldName.stripSuffix("\"").stripPrefix("\"")
   }
 
   private def createInstance(tpe:Type): Any = {

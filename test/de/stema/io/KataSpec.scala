@@ -69,7 +69,7 @@ class KataSpec extends PlaySpec {
   }
 
   "exceptions" should {
-    "be thrown in any case" in {
+    "be thrown in case of null" in {
       def validate(auto: Auto) = auto match {
         case null                           => throw NullAutoException("Auto ist null")
         case Auto(null)                     => throw NullMotorException("Motor ist null")
@@ -97,6 +97,12 @@ class KataSpec extends PlaySpec {
       intercept[  NullBrennwert]          (validate(  autoMitNullBrennwert))
       intercept[  NullKerzeException]     (validate(  bmwMitNullKerze))
       intercept[  NullPsUndNullBrennwert] (validate(  bmwMitNullPsUndNullBrennwert))
+    }
+
+    "be thrown in case of wrong type" in {
+      new Auto(null) match {
+        case auto: BMW => throw new RuntimeException
+      }
     }
   }
 }

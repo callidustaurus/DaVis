@@ -12,8 +12,8 @@ class CSVDataMapperSpec extends PlaySpec {
 
   "transformDataTo(...)" should {
     val data = List(
-      Map(x("foo") -> "a value for foo", x("baa") -> "baa", x("bar") -> "blubb"),
-      Map(x("foo") -> "another value for foo", x("baa") -> "baa", x("bar") -> "blubb")
+      Map("foo" -> "a value for foo", "baa" -> "baa", "bar" -> "blubb"),
+      Map("foo" -> "another value for foo", "baa" -> "baa", "bar" -> "blubb")
     )
 
     "map the given data to given model" in {
@@ -31,7 +31,4 @@ class CSVDataMapperSpec extends PlaySpec {
       result(1).differentNameThen_Bar mustBe "blubb"
     }
   }
-
-  // TODO remove that after fixing the problem with quotes within CSVDataMapper
-  private def x(string : String) = "\""+string+"\""
 }
