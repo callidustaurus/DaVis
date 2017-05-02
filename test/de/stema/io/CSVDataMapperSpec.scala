@@ -1,24 +1,36 @@
 package de.stema.io
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
 import org.scalatestplus.play.PlaySpec
 
 class Testee {
   @CSVData("foo") val foo: String = null
   @CSVData("baa") val baa_val: String = null
   @CSVData("bar") val differentNameThen_Bar: String = null
+  @CSVData("myInt") val aNumber : BigInt = null
+  @CSVData("myDouble") val aDecimalNumber : BigDecimal = null
+  @CSVData("myBoolean") val trueOrNot : Boolean = false
+  @CSVData("myDate") val dayMonthYear : LocalDate = null
 }
 
 class CSVDataMapperSpec extends PlaySpec {
 
   "transformDataTo(...)" should {
-    val data = List(
+    val dateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+    val stringData = List(
       Map("foo" -> "a value for foo", "baa" -> "baa", "bar" -> "blubb"),
       Map("foo" -> "another value for foo", "baa" -> "baa", "bar" -> "blubb")
     )
 
-    "map the given data to given model" in {
+    val mixedTypeData = List(
+      Map("myInt" -> "1", "myDouble" -> "1.1", "myBoolean" -> "true", "myDate" -> "01.01.2000")
+    )
+
+    "map the given stringData to given model" in {
       val mapper = new CSVDataMapper()
-      val result =mapper.transformDataTo[Testee](data)
+      val result = mapper.transformDataTo[Testee](stringData)
 
       result.size mustBe 2
 
@@ -29,6 +41,19 @@ class CSVDataMapperSpec extends PlaySpec {
       result(1).foo mustBe "another value for foo"
       result(1).baa_val mustBe "baa"
       result(1).differentNameThen_Bar mustBe "blubb"
+    }
+
+    "map the data according to field-type" in {
+      val mapper = new CSVDataMapper()
+      val result = mapper.transformDataTo[Testee](mixedTypeData)
+
+      result.size mustBe 1
+
+      result.head.aNumber mustBe 1
+      result.head.aDecimalNumber mustBe 1.1
+      result.head.trueOrNot mustBe true
+      result.head.dayMonthYear mustBe LocalDate.parse("01.01.2000", dateFormat)
+
     }
   }
 }
