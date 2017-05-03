@@ -3,15 +3,17 @@ package de.stema.io
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+import com.google.inject.Inject
+import play.api.Configuration
+
 import scala.reflect.runtime.{universe => ru}
 import ru._
 
-class CSVDataMapper {
+class CSVDataMapper @Inject() (configuration: Configuration) {
 
   def transformDataTo[T: TypeTag](data: List[Map[String, String]]): List[T] = {
-    val allFields =
-      typeOf[T].
-        members.
+    val member = typeOf[T].members
+      val allFields = member.
         collect { case symbol: TermSymbol => symbol }.
         filter(s => s.isVal || s.isVar)
 
@@ -25,6 +27,8 @@ class CSVDataMapper {
     data.map { singleData =>
       // for each entry in file, create a new instance of given data-model of type T
       val inst = createInstance(typeOf[T])
+      val foo = inst.getClass.getDeclaredAnnotations
+      val baa = inst.getClass.getDeclaredField("foo").getAnnotations
       fieldsWithAnnotation.foreach { field =>
         // for each annotated field in class of type T, get the name that is defined within annotation
         val fieldName = getFieldName(field)
@@ -51,11 +55,12 @@ class CSVDataMapper {
     val fieldMirror = instanceMirror.reflectField(field._1)
     val t = field._1.typeSignature
 
-    if(t =:= typeOf[String])      fieldMirror.set(fieldValue)
-    if(t =:= typeOf[Boolean])     fieldMirror.set(fieldValue.toBoolean)
-    if(t =:= typeOf[BigDecimal])  fieldMirror.set(BigDecimal.apply(fieldValue))
-    if(t =:= typeOf[BigInt])      fieldMirror.set(BigInt.apply(fieldValue))
-    if(t =:= typeOf[LocalDate])   fieldMirror.set(LocalDate.parse(fieldValue, dateFormat))
+    if(t =:= typeOf[String])        fieldMirror.set(fieldValue)
+    if(t =:= typeOf[Boolean])       fieldMirror.set(fieldValue.toBoolean)
+    if(t =:= typeOf[BigDecimal])    fieldMirror.set(BigDecimal.apply(fieldValue))
+    if(t =:= typeOf[BigInt])        fieldMirror.set(BigInt.apply(fieldValue))
+    if(t =:= typeOf[LocalDate])     fieldMirror.set(LocalDate.parse(fieldValue, dateFormat))
+    if(t =:= typeOf[Configuration]) fieldMirror.set(configuration)
   }
 
   private def createInstance(tpe:Type): Any = {

@@ -3,9 +3,11 @@ package de.stema.io
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
+import play.api.Configuration
 
-class Testee {
+class Testee extends Foo {
   @CSVData("foo") val foo: String = null
   @CSVData("baa") val baa_val: String = null
   @CSVData("bar") val differentNameThen_Bar: String = null
@@ -15,8 +17,13 @@ class Testee {
   @CSVData("myDate") val dayMonthYear : LocalDate = null
 }
 
-class CSVDataMapperSpec extends PlaySpec {
+trait Foo {
+  @CSVData(Config.CONFIG_KEY) val withinTrait : String = null
+}
 
+class CSVDataMapperSpec extends PlaySpec {
+  private val configuration = Configuration("foo" -> "baa")
+  private val mapper = new CSVDataMapper(configuration)
   "transformDataTo(...)" should {
     val dateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy")
     val stringData = List(
@@ -29,7 +36,7 @@ class CSVDataMapperSpec extends PlaySpec {
     )
 
     "map the given stringData to given model" in {
-      val mapper = new CSVDataMapper()
+
       val result = mapper.transformDataTo[Testee](stringData)
 
       result.size mustBe 2
@@ -44,7 +51,6 @@ class CSVDataMapperSpec extends PlaySpec {
     }
 
     "map the data according to field-type" in {
-      val mapper = new CSVDataMapper()
       val result = mapper.transformDataTo[Testee](mixedTypeData)
 
       result.size mustBe 1
@@ -54,6 +60,16 @@ class CSVDataMapperSpec extends PlaySpec {
       result.head.trueOrNot mustBe true
       result.head.dayMonthYear mustBe LocalDate.parse("01.01.2000", dateFormat)
 
+    }
+
+    "map date also to underlying traits" in {
+      val data =    List(Map("foo" -> "foo value", "within a trait" -> "trait value"))
+      val result = mapper.transformDataTo[Testee](data)
+
+      result.size mustBe 1
+
+      result.head.foo mustBe "foo value"
+      result.head.withinTrait mustBe "trait value"
     }
   }
 }
