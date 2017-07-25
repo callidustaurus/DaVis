@@ -2,9 +2,12 @@ package de.stema.finance
 
 import java.time.LocalDate
 
-import de.stema.io.{CSVData, Config}
+import de.stema.io.CSVData
+import play.Configuration
 
-class SpkData extends CategoryMapper with Config {
+class SpkData extends CategoryMapper {
+  @CSVData("play-configuration") val config: Configuration = null
+
   @CSVData("Auftragskonto")                      val aufragsKonto: BigInt = null
   @CSVData("Buchungstag")                        val buchungsTag: LocalDate = null
   @CSVData("Valutadatum")                        val valutaDatum: LocalDate = null

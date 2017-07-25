@@ -7,7 +7,7 @@ import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.Configuration
 
-class Testee extends Foo {
+class Testee {
   @CSVData("foo") val foo: String = null
   @CSVData("baa") val baa_val: String = null
   @CSVData("bar") val differentNameThen_Bar: String = null
@@ -15,10 +15,6 @@ class Testee extends Foo {
   @CSVData("myDouble") val aDecimalNumber : BigDecimal = null
   @CSVData("myBoolean") val trueOrNot : Boolean = false
   @CSVData("myDate") val dayMonthYear : LocalDate = null
-}
-
-trait Foo {
-  @CSVData(Config.CONFIG_KEY) val withinTrait : String = null
 }
 
 class CSVDataMapperSpec extends PlaySpec {
@@ -32,7 +28,7 @@ class CSVDataMapperSpec extends PlaySpec {
     )
 
     val mixedTypeData = List(
-      Map("myInt" -> "1", "myDouble" -> "1.1", "myBoolean" -> "true", "myDate" -> "01.01.2000")
+      Map("myInt" -> "1", "myDouble" -> "1.1", "myBoolean" -> "true", "myDate" -> "01.01.00")
     )
 
     "map the given stringData to given model" in {
@@ -69,7 +65,6 @@ class CSVDataMapperSpec extends PlaySpec {
       result.size mustBe 1
 
       result.head.foo mustBe "foo value"
-      result.head.withinTrait mustBe "trait value"
     }
   }
 }

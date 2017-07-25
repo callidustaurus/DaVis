@@ -14,8 +14,12 @@ class CSVDataMapper @Inject() (configuration: Configuration) {
   def transformDataTo[T: TypeTag](data: List[Map[String, String]]): List[T] = {
     val member = typeOf[T].members
       val allFields = member.
-        collect { case symbol: TermSymbol => symbol }.
-        filter(s => s.isVal || s.isVar)
+        collect {
+          case symbol: TermSymbol =>
+            symbol
+        }.
+        filter(s =>
+          s.isVal || s.isVar || (s.isGetter && s.isAccessor && s.isTerm))
 
     val fieldsWithAnnotation = allFields.flatMap(field =>
       field.annotations.find(_.tpe =:= typeOf[CSVData]).
@@ -27,8 +31,8 @@ class CSVDataMapper @Inject() (configuration: Configuration) {
     data.map { singleData =>
       // for each entry in file, create a new instance of given data-model of type T
       val inst = createInstance(typeOf[T])
-      val foo = inst.getClass.getDeclaredAnnotations
-      val baa = inst.getClass.getDeclaredField("foo").getAnnotations
+  //    val foo = inst.getClass.getDeclaredAnnotations
+    //  val baa = inst.getClass.getDeclaredField("foo").getAnnotations
       fieldsWithAnnotation.foreach { field =>
         // for each annotated field in class of type T, get the name that is defined within annotation
         val fieldName = getFieldName(field)
@@ -50,14 +54,16 @@ class CSVDataMapper @Inject() (configuration: Configuration) {
   }
 
   private def setFieldValue(field: (TermSymbol, Annotation), fieldValue: String, instanceMirror: InstanceMirror) = {
-    val dateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+    val dateFormat = DateTimeFormatter.ofPattern("dd.MM.yy")
 
     val fieldMirror = instanceMirror.reflectField(field._1)
     val t = field._1.typeSignature
 
+    println("#################### -> " + fieldValue)
+    println(t)
     if(t =:= typeOf[String])        fieldMirror.set(fieldValue)
     if(t =:= typeOf[Boolean])       fieldMirror.set(fieldValue.toBoolean)
-    if(t =:= typeOf[BigDecimal])    fieldMirror.set(BigDecimal.apply(fieldValue))
+    if(t =:= typeOf[BigDecimal])    fieldMirror.set(BigDecimal.apply(fieldValue.replace(',', '.')))
     if(t =:= typeOf[BigInt])        fieldMirror.set(BigInt.apply(fieldValue))
     if(t =:= typeOf[LocalDate])     fieldMirror.set(LocalDate.parse(fieldValue, dateFormat))
     if(t =:= typeOf[Configuration]) fieldMirror.set(configuration)
