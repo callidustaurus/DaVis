@@ -3,10 +3,11 @@ package de.stema.finance
 import java.time.LocalDate
 
 import de.stema.io.CSVData
-import play.Configuration
+import play.api.Configuration
+
 
 class SpkData extends CategoryMapper {
-  @CSVData("play-configuration") val config: Configuration = null
+  //@CSVData("play-configuration") val config: Configuration = null
 
   @CSVData("Auftragskonto")                      val aufragsKonto: BigInt = null
   @CSVData("Buchungstag")                        val buchungsTag: LocalDate = null
@@ -26,11 +27,14 @@ class SpkData extends CategoryMapper {
   @CSVData("Waehrung")                           val waehrung: String = null
   @CSVData("Info")                               val info: String = null
 
-  protected def valueToMap: String = glaeubigerID
+  lazy val category: PayedForCategory = getCategory
+  protected def valueToMap: String = verwendungszweck
 
   protected def mapping: Map[String, PayedForCategory] = Map(
     "Lidl" -> Lebensmittel,
     "rewe" -> Lebensmittel,
-    "VHV"  -> Versicherung
+    "VHV"  -> Versicherung,
+    "Netflix" -> Luxus,
+    "Lohn/Gehalt" -> Einkommen
   )
 }

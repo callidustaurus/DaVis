@@ -1,0 +1,12 @@
+td {
+    border: solid;
+}
+
+table {
+    font-family: sans-serif;
+    float:left;
+}
+
+.currency {
+    text-align:end;
+}

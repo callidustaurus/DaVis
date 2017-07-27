@@ -1,0 +1,57 @@
+<!-- UNDER CONSTRUCTION-->
+<html ng-app="davis">
+<head>
+    <script src="@routes.Assets.versioned("javascripts/angular.js")"></script>
+    <script src="@routes.Assets.versioned("javascripts/scripts.js")"></script>
+    <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/table.css")">
+    <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/head.css")">
+
+</head>
+<body>
+    <div ng-controller="dataController">
+        <div class="head">
+            <h1>DaVis</h1>
+
+            <select ng-model="groupByCategory.category.name">
+                <option value="">Keine Gruppierung</option>
+                <option>Lebensmittel</option>
+                <option>Versicherung</option>
+                <option>Luxus</option>
+                <option>Einkommen</option>
+            </select>
+
+            <select ng-model="groupByValue">
+                <option value="">Keine Gruppierung</option>
+                <option value="1000">1000</option>
+                <option value="0"> 0</option>
+            </select>
+
+        </div>
+
+
+        <table>
+            <thead>
+                <tr>
+                    <th ng-click="sortInDescendingOrder = !sortInDescendingOrder; rowToSort='beguenstigter'">Begünstigter</th>
+                    <th ng-click="sortInDescendingOrder = !sortInDescendingOrder; rowToSort='betrag'">Betrag</th>
+                    <th ng-click="sortInDescendingOrder = !sortInDescendingOrder; rowToSort='buchungsTag'">Datum</th>
+                    <th>Buchungstext</th>
+                    <th ng-click="sortInDescendingOrder = !sortInDescendingOrder; rowToSort='category.name'">Kategorie</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="csv in csvData | orderBy:rowToSort:sortInDescendingOrder | filter: comparison('betrag', groupByValue, 'greaterThen') | filter:groupByCategory">
+                    <td>{{ csv.beguenstigter }}</td>
+                    <td class="currency">{{ csv.betrag | currency:"€"}}</td>
+                    <td>{{ csv.buchungsTag  | date:"dd.MM.yyyy" }}</td>
+                    <td>{{ csv.buchungsText }}</td>
+                    <td>{{ csv.category.name }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</body>
+
+
+</html>

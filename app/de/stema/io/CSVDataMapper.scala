@@ -22,6 +22,7 @@ class CSVDataMapper @Inject() (configuration: Configuration) {
           s.isVal || s.isVar || (s.isGetter && s.isAccessor && s.isTerm))
 
     val fieldsWithAnnotation = allFields.flatMap(field =>
+      // TODO check if >>> field.annotations.find(_.tree.tpe =:= typeOf[CSVData]). <<< works as expected
       field.annotations.find(_.tpe =:= typeOf[CSVData]).
         map((field, _))).
       toList
@@ -31,17 +32,18 @@ class CSVDataMapper @Inject() (configuration: Configuration) {
     data.map { singleData =>
       // for each entry in file, create a new instance of given data-model of type T
       val inst = createInstance(typeOf[T])
-  //    val foo = inst.getClass.getDeclaredAnnotations
-    //  val baa = inst.getClass.getDeclaredField("foo").getAnnotations
+      val instanceMirror = mirror.reflect(inst)
       fieldsWithAnnotation.foreach { field =>
         // for each annotated field in class of type T, get the name that is defined within annotation
         val fieldName = getFieldName(field)
-        // get the value of the current data-set (one line of csv) by the annotation-name
-        singleData.get(fieldName).foreach { fieldValue =>
-          val instanceMirror = mirror.reflect(inst)
-          // set the value of the annotated field to the value that came from csv
-          setFieldValue(field, fieldValue, instanceMirror)
-          //fieldMirror.set(fieldValue)
+        fieldName match {
+          case conf if conf == "play-configuration" => setConfiguration(field, configuration, instanceMirror)
+          case name =>
+            // get the value of the current data-set (one line of csv) by the annotation-name
+            singleData.get(name).foreach { fieldValue =>
+            // set the value of the annotated field to the value that came from csv
+            setFieldValue(field, fieldValue, instanceMirror)
+        }
         }
       }
       inst.asInstanceOf[T]
@@ -59,13 +61,17 @@ class CSVDataMapper @Inject() (configuration: Configuration) {
     val fieldMirror = instanceMirror.reflectField(field._1)
     val t = field._1.typeSignature
 
-    println("#################### -> " + fieldValue)
-    println(t)
     if(t =:= typeOf[String])        fieldMirror.set(fieldValue)
     if(t =:= typeOf[Boolean])       fieldMirror.set(fieldValue.toBoolean)
     if(t =:= typeOf[BigDecimal])    fieldMirror.set(BigDecimal.apply(fieldValue.replace(',', '.')))
     if(t =:= typeOf[BigInt])        fieldMirror.set(BigInt.apply(fieldValue))
     if(t =:= typeOf[LocalDate])     fieldMirror.set(LocalDate.parse(fieldValue, dateFormat))
+    if(t =:= typeOf[Configuration]) fieldMirror.set(configuration)
+  }
+
+  private def setConfiguration(field: (TermSymbol, Annotation), configuration: Configuration, instanceMirror: InstanceMirror) = {
+    val fieldMirror = instanceMirror.reflectField(field._1)
+    val t = field._1.typeSignature
     if(t =:= typeOf[Configuration]) fieldMirror.set(configuration)
   }
 
